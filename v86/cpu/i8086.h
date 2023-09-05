@@ -82,6 +82,9 @@ namespace v86 {
 
 		/* 0x20 ~ 0x2F opcode series. */
 		virtual void onOpcode2X(uint8_t opcode);
+
+		/* 0x30 ~ 0x3F opcode series. */
+		virtual void onOpcode3X(uint8_t opcode);
 	};
 
 }
