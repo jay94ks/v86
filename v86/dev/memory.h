@@ -3,7 +3,7 @@
 #include "../types.h"
 
 namespace v86 {
-	class IMemory {
+	class IMemory : public IRefCounted {
 	public:
 		virtual ~IMemory() { }
 
