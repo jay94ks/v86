@@ -12,6 +12,8 @@ namespace v86 {
 	using int16_t = ::int16_t;
 	using int32_t = ::int32_t;
 	using int64_t = ::int64_t;
+
+	using nullptr_t = decltype(nullptr)
 }
 
 #endif // __V86_TYPES_H__
