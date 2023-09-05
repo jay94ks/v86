@@ -90,29 +90,6 @@ namespace v86 {
 			continue;
 		}
 
-		/**
-		 *
-		 * 0	0000	Mod RM
-		 * 1	0001	Mod RM
-		 * 2	0010	Mod RM
-		 * 3	0011	Mod RM
-		 * 4	0100
-		 * 5	0101
-		 * 6	0110
-		 * 7	0111
-		 * 8	1000	Mod RM
-		 * 9	1001	Mod RM
-		 * A	1010	Mod RM
-		 * B	1011	Mod RM
-		 * C	1100
-		 * D	1101
-		 * E	1110
-		 * F	1111
-		 */
-		if ((opcode & 3) != 0) {
-			fetchModRm16();
-		}
-
 		uint8_t series = opcode >> 4;
 		switch (series) {
 		case 0x00: onOpcode0X(opcode); break;
@@ -121,6 +98,7 @@ namespace v86 {
 		case 0x03: onOpcode3X(opcode); break;
 		case 0x04: onOpcode4X(opcode); break;
 		case 0x05: onOpcode5X(opcode); break;
+		case 0x06: onOpcode6X(opcode); break;
 		}
 	}
 
@@ -415,6 +393,7 @@ namespace v86 {
 
 		switch (opcode & 0x0f) {
 		case 0x00: { /* 00 ADD Eb Gb */
+			fetchModRm16();
 			OPERAND_RM8_REG8();
 			COMPUTE(+);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -424,6 +403,7 @@ namespace v86 {
 		}
 
 		case 0x01: { /* 01 ADD Ev Gv */
+			fetchModRm16();
 			OPERAND_RM16_REG16();
 			COMPUTE(+);
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -433,6 +413,7 @@ namespace v86 {
 		}
 
 		case 0x02: { /* 02 ADD Gb Eb */
+			fetchModRm16();
 			OPERAND_REG8_RM8();
 			COMPUTE(+);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -442,6 +423,7 @@ namespace v86 {
 		}
 
 		case 0x03: { /* 03 ADD Gv Ev */
+			fetchModRm16();
 			OPERAND_REG16_RM16();
 			COMPUTE(+);
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -479,6 +461,7 @@ namespace v86 {
 		}
 
 		case 0x08: { /* 08 OR Eb Gb */
+			fetchModRm16();
 			OPERAND_RM8_REG8();
 			COMPUTE(|);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -488,6 +471,7 @@ namespace v86 {
 		}
 
 		case 0x09: { /* 09 OR Ev Gv */
+			fetchModRm16();
 			OPERAND_RM16_REG16();
 			COMPUTE(|);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -497,6 +481,7 @@ namespace v86 {
 
 		}
 		case 0x0A: { /* 0A OR Gb Eb */
+			fetchModRm16();
 			OPERAND_REG8_RM8();
 			COMPUTE(|);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -505,6 +490,7 @@ namespace v86 {
 			break;
 		}
 		case 0x0B: { /* 0B OR Gv Ev */
+			fetchModRm16();
 			OPERAND_REG16_RM16();
 			COMPUTE(|);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -545,6 +531,7 @@ namespace v86 {
 		USE_FETCH_STATE(this, fst);
 		switch (opcode & 0x0f) {
 		case 0x00: { /* 10 ADC Eb Gb */
+			fetchModRm16();
 			OPERAND_RM8_REG8();
 			COMPUTE(+, +eflag<EFLAG_CF>(state));
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -554,6 +541,7 @@ namespace v86 {
 		}
 
 		case 0x01: { /* 11 ADC Ev Gv */
+			fetchModRm16();
 			OPERAND_RM16_REG16();
 			COMPUTE(+, +eflag<EFLAG_CF>(state));
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -563,6 +551,7 @@ namespace v86 {
 		}
 
 		case 0x02: { /* 12 ADC Gb Eb */
+			fetchModRm16();
 			OPERAND_REG8_RM8();
 			COMPUTE(+, +eflag<EFLAG_CF>(state));
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -572,6 +561,7 @@ namespace v86 {
 		}
 
 		case 0x03: { /* 13 ADC Gv Ev */
+			fetchModRm16();
 			OPERAND_REG16_RM16();
 			COMPUTE(+, +eflag<EFLAG_CF>(state));
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -609,6 +599,7 @@ namespace v86 {
 		}
 
 		case 0x08: { /* 18 SBB Eb Gb */
+			fetchModRm16();
 			OPERAND_RM8_REG8();
 			COMPUTE(-,-eflag<EFLAG_CF>(state));
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -618,6 +609,7 @@ namespace v86 {
 		}
 
 		case 0x09: { /* 19 SBB Ev Gv */
+			fetchModRm16();
 			OPERAND_RM16_REG16();
 			COMPUTE(-, -eflag<EFLAG_CF>(state));
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -627,6 +619,7 @@ namespace v86 {
 
 		}
 		case 0x0A: { /* 1A SBB Gb Eb */
+			fetchModRm16();
 			OPERAND_REG8_RM8();
 			COMPUTE(-, -eflag<EFLAG_CF>(state));
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -635,6 +628,7 @@ namespace v86 {
 			break;
 		}
 		case 0x0B: { /* 1B SBB Gv Ev */
+			fetchModRm16();
 			OPERAND_REG16_RM16();
 			COMPUTE(-, -eflag<EFLAG_CF>(state));
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -676,6 +670,7 @@ namespace v86 {
 
 		switch (opcode & 0x0f) {
 		case 0x00: { /* 20 AND Eb Gb */
+			fetchModRm16();
 			OPERAND_RM8_REG8();
 			COMPUTE(&);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -685,6 +680,7 @@ namespace v86 {
 		}
 
 		case 0x01: { /* 21 AND Ev Gv */
+			fetchModRm16();
 			OPERAND_RM16_REG16();
 			COMPUTE(&);
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -694,6 +690,7 @@ namespace v86 {
 		}
 
 		case 0x02: { /* 22 AND Gb Eb */
+			fetchModRm16();
 			OPERAND_REG8_RM8();
 			COMPUTE(&);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -703,6 +700,7 @@ namespace v86 {
 		}
 
 		case 0x03: { /* 23 AND Gv Ev */
+			fetchModRm16();
 			OPERAND_REG16_RM16();
 			COMPUTE(&);
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -759,6 +757,7 @@ namespace v86 {
 		}
 
 		case 0x08: { /* 28 SUB Eb Gb */
+			fetchModRm16();
 			OPERAND_RM8_REG8();
 			COMPUTE(-);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -768,6 +767,7 @@ namespace v86 {
 		}
 
 		case 0x09: { /* 29 SUB Ev Gv */
+			fetchModRm16();
 			OPERAND_RM16_REG16();
 			COMPUTE(-);
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -777,6 +777,7 @@ namespace v86 {
 
 		}
 		case 0x0A: { /* 2A SUB Gb Eb */
+			fetchModRm16();
 			OPERAND_REG8_RM8();
 			COMPUTE(-);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -785,6 +786,7 @@ namespace v86 {
 			break;
 		}
 		case 0x0B: { /* 2B SUB Gv Ev */
+			fetchModRm16();
 			OPERAND_REG16_RM16();
 			COMPUTE(-);
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -851,6 +853,7 @@ namespace v86 {
 
 		switch (opcode & 0x0f) {
 		case 0x00: { /* 30 XOR Eb Gb */
+			fetchModRm16();
 			OPERAND_RM8_REG8();
 			COMPUTE(^);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -860,6 +863,7 @@ namespace v86 {
 		}
 
 		case 0x01: { /* 31 XOR Ev Gv */
+			fetchModRm16();
 			OPERAND_RM16_REG16();
 			COMPUTE(^);
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -869,6 +873,7 @@ namespace v86 {
 		}
 
 		case 0x02: { /* 32 XOR Gb Eb */
+			fetchModRm16();
 			OPERAND_REG8_RM8();
 			COMPUTE(^);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -878,6 +883,7 @@ namespace v86 {
 		}
 
 		case 0x03: { /* 33 XOR Gv Ev */
+			fetchModRm16();
 			OPERAND_REG16_RM16();
 			COMPUTE(^);
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -927,6 +933,7 @@ namespace v86 {
 		}
 
 		case 0x08: { /* 38 CMP Eb Gb */
+			fetchModRm16();
 			OPERAND_RM8_REG8();
 			COMPUTE(-);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -935,6 +942,7 @@ namespace v86 {
 		}
 
 		case 0x09: { /* 39 CMP Ev Gv */
+			fetchModRm16();
 			OPERAND_RM16_REG16();
 			COMPUTE(-);
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -943,6 +951,7 @@ namespace v86 {
 
 		}
 		case 0x0A: { /* 3A CMP Gb Eb */
+			fetchModRm16();
 			OPERAND_REG8_RM8();
 			COMPUTE(-);
 			FLAG_ZF_SF_PF(sizeof(uint8_t));
@@ -950,6 +959,7 @@ namespace v86 {
 			break;
 		}
 		case 0x0B: { /* 3B CMP Gv Ev */
+			fetchModRm16();
 			OPERAND_REG16_RM16();
 			COMPUTE(-);
 			FLAG_ZF_SF_PF(sizeof(uint16_t));
@@ -1224,6 +1234,222 @@ namespace v86 {
 
 		else {
 			pop(&state->regs[reg].word[REG_WORD], sizeof(uint16_t));
+		}
+	}
+
+	void Ci8086::onOpcode6X(uint8_t opcode) {
+		USE_STATE(this, state);
+		USE_FETCH_STATE(this, fst);
+
+		switch (opcode & 0x0f) {
+		case 0x00: { /* 60 PUSHA */
+			uint16_t o_sp = state->sp;
+
+			PUSH16_REG(uint16_t, ax);
+			PUSH16_REG(uint16_t, cx);
+			PUSH16_REG(uint16_t, dx);
+			PUSH16_REG(uint16_t, bx);
+			push(&o_sp, sizeof(o_sp));
+			PUSH16_REG(uint16_t, bp);
+			PUSH16_REG(uint16_t, si);
+			PUSH16_REG(uint16_t, di);
+			break;
+		}
+
+		case 0x01: { /* 61 POPA */
+			uint16_t unused;
+			POP16_REG(uint16_t, ax);
+			POP16_REG(uint16_t, cx);
+			POP16_REG(uint16_t, dx);
+			POP16_REG(uint16_t, bx);
+			pop(&unused, sizeof(unused)); // --> sp.
+			POP16_REG(uint16_t, bp);
+			POP16_REG(uint16_t, si);
+			POP16_REG(uint16_t, di);
+			break;
+		}
+
+		case 0x02: { /* 62 BOUND Gv Ev */
+			fetchModRm16();
+			uint32_t addr = addrModRM16();
+
+			int32_t s1 = RM_REG_WORD(fst->rm);
+			int32_t s2 = 0;
+
+			read(addr, &s2, sizeof(s2));
+
+			if (s1 < s2) {
+				// todo: interrupt 0x05.
+			}
+
+			else {
+				addr += 2;
+				read((addr >> 8) + (addr & 15), &s2, sizeof(s2));
+
+				if (s1 > s2) {
+					// todo: interrupt 0x05.
+				}
+			}
+
+			break;
+
+		case 0x03: case 0x04: case 0x05: case 0x06: case 0x07:
+			/* 63 ~ 67 NOP. */
+			break;
+
+		case 0x08: { /* 68 PUSH Iv */
+			uint16_t val = fetch16();
+			push(&val, sizeof(val));
+			break;
+		}
+
+		case 0x09: { /* 69 IMUL Gv Ev Iv */
+			fetchModRm16();
+			fst->op[0].dword = readRM16();
+			fst->op[1].dword = fetch16();
+
+			if ((fst->op[0].dword & 0x8000L) != 0) {
+				fst->op[0].dword |= REG_MASK_HI16;
+			}
+
+			if ((fst->op[1].dword & 0x8000L) != 0) {
+				fst->op[1].dword |= REG_MASK_HI16;
+			}
+
+			fst->res.dword
+				= fst->op[0].dword
+				* fst->op[1].dword;
+
+			writeRM16(fst->res.word[REG_WORD]);
+			if ((fst->res.dword & REG_MASK_HI16) != 0) {
+				eflag<EFLAG_CF>(state, 1);
+				eflag<EFLAG_OF>(state, 1);
+			}
+
+			else {
+				eflag<EFLAG_CF>(state, 0);
+				eflag<EFLAG_OF>(state, 0);
+			}
+
+			break;
+		}
+
+		case 0x0A: { /* 6A PUSH Ib */
+			uint8_t val = fetch();
+			push(&val, sizeof(val));
+			break;
+		}
+
+		case 0x0B: { /* 6B IMUL Gv Eb Ib */
+			fetchModRm16();
+			fst->op[0].dword = readRM8();
+			fst->op[1].dword = fetch();
+
+			if ((fst->op[0].dword & 0x8000L) != 0) {
+				fst->op[0].dword |= REG_MASK_HI16;
+			}
+
+			if ((fst->op[1].dword & 0x8000L) != 0) {
+				fst->op[1].dword |= REG_MASK_HI16;
+			}
+
+			fst->res.dword
+				= fst->op[0].dword
+				* fst->op[1].dword;
+
+			writeRM16(fst->res.word[REG_WORD]);
+			if ((fst->res.dword & REG_MASK_HI16) != 0) {
+				eflag<EFLAG_CF>(state, 1);
+				eflag<EFLAG_OF>(state, 1);
+			}
+
+			else {
+				eflag<EFLAG_CF>(state, 0);
+				eflag<EFLAG_OF>(state, 0);
+			}
+
+			break;
+		}
+		case 0x0C:   /* 6C INSB */
+		case 0x0D: { /* 6D INSW */
+			if (state->prefix.rep != 0 && !state->cx) {
+				break;
+			}
+
+			USE_PORT(this, port);
+			uint32_t addr = addr16imm(state->prefix.seg, state->si);
+			uint8_t data, sz = (opcode & 0x0f) == 0x0d ? 2 : 1;
+
+			if (port->read(state->dx, &data) == false) {
+				data = 0xff;
+			}
+
+			write(addr, &data, sizeof(data));
+			if (sz > 1) {
+				if (port->read(state->dx, &data) == false) {
+					data = 0xff;
+				}
+
+				write(addr + 1, &data, sizeof(data));
+			}
+
+			if (eflag<EFLAG_DF>(state)) {
+				state->si -= sz;
+				state->di -= sz;
+			}
+
+			else {
+				state->si += sz;
+				state->di += sz;
+			}
+
+			if (!state->prefix.rep) {
+				break;
+			}
+
+			// --> jump to this opcode again.
+			state->cx--;
+			state->eip = state->t_eip;
+			break;
+		}
+
+		case 0x0E:   /* 6E OUTSB */
+		case 0x0F: { /* 6F OUTSW */
+			if (state->prefix.rep != 0 && !state->cx) {
+				break;
+			}
+
+			USE_PORT(this, port);
+			uint32_t addr = addr16imm(state->prefix.seg, state->si);
+			uint8_t data, sz = (opcode & 0x0f) == 0x0d ? 2 : 1;
+
+			read(addr, &data, sizeof(data));
+			port->write(state->dx, data);
+
+			if (sz > 1) {
+				read(addr + 1, &data, sizeof(data));
+				port->write(state->dx, data);
+			}
+
+			if (eflag<EFLAG_DF>(state)) {
+				state->si -= sz;
+				state->di -= sz;
+			}
+
+			else {
+				state->si += sz;
+				state->di += sz;
+			}
+
+			if (!state->prefix.rep) {
+				break;
+			}
+
+			// --> jump to this opcode again.
+			state->cx--;
+			state->eip = state->t_eip;
+			break;
+		}
 		}
 	}
 

@@ -91,6 +91,9 @@ namespace v86 {
 
 		/* 0x50 ~ 0x5F opcode series (PUSH/POP GPR). */
 		virtual void onOpcode5X(uint8_t opcode);
+
+		/* 0x60 ~ 0x6F opcode series (PUSHA, POPA, BOUND, PUSH Iv, IMUL, PUSB Ib, INSB, INSW, OUTSB, OUTSW) */
+		virtual void onOpcode6X(uint8_t opcode);
 	};
 
 }
