@@ -24,9 +24,6 @@
     <ClInclude Include="dev\device.h">
       <Filter>dev</Filter>
     </ClInclude>
-    <ClInclude Include="cpu\mmu\stack.h">
-      <Filter>cpu\mmu</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cpu">
@@ -35,8 +32,13 @@
     <Filter Include="dev">
       <UniqueIdentifier>{508d7046-cb86-4785-8b48-528b897a6690}</UniqueIdentifier>
     </Filter>
-    <Filter Include="cpu\mmu">
-      <UniqueIdentifier>{73f1711c-a3d2-43d3-b5bd-393fc65d379c}</UniqueIdentifier>
-    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cpu\i8086.cpp">
+      <Filter>cpu</Filter>
+    </ClCompile>
+    <ClCompile Include="cpu\proc.cpp">
+      <Filter>cpu</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

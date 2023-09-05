@@ -76,6 +76,12 @@ namespace v86 {
 	protected:
 		/* 0x00 ~ 0x0F opcode series. */
 		virtual void onOpcode0X(uint8_t opcode);
+
+		/* 0x10 ~ 0x1F opcode series. */
+		virtual void onOpcode1X(uint8_t opcode);
+
+		/* 0x20 ~ 0x2F opcode series. */
+		virtual void onOpcode2X(uint8_t opcode);
 	};
 
 }

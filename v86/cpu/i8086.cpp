@@ -116,6 +116,8 @@ namespace v86 {
 		uint8_t series = opcode >> 4;
 		switch (series) {
 		case 0x00: onOpcode0X(opcode); break;
+		case 0x01: onOpcode1X(opcode); break;
+		case 0x02: onOpcode2X(opcode); break;
 		}
 	}
 
@@ -384,8 +386,8 @@ namespace v86 {
 	fst->op[0].dword = state->ax; \
 	fst->op[1].dword = fetch()
 
-#define COMPUTE(exec)	\
-	fst->res.dword = fst->op[0].dword exec fst->op[1].dword
+#define COMPUTE(exec, ...)	\
+	fst->res.dword = fst->op[0].dword exec fst->op[1].dword __VA_ARGS__
 
 #define RES_XOR_OP_N(n) (fst->res.dword ^ fst->op[n].dword)
 #define RES_XOR_OP_TWO() (fst->res.dword ^ fst->op[0].dword ^ fst->op[1].dword)
@@ -396,20 +398,19 @@ namespace v86 {
 	eflag<EFLAG_PF>(state, parity(fst->res.byte[REG_BYTE_LO]))
 
 #define FLAG_CF_OF_AF(size) \
-	eflag<EFLAG_CF>(state, fst->res.word[REG_WORD_HI] ? 1 : 0);\
-	eflag<EFLAG_OF>(state, (RES_XOR_OP_N(0) & RES_XOR_OP_N(1) & 0x8000) == 0x8000 ? 1: 0);\
+	eflag<EFLAG_CF>(state, fst->res.dword >> (size * 8 - 1) ? 1 : 0);\
+	eflag<EFLAG_OF>(state, (RES_XOR_OP_N(0) & RES_XOR_OP_N(1) & (0x80 << ((size - 1) * 8))) == (0x80 << ((size - 1) * 8)) ? 1: 0);\
 	eflag<EFLAG_AF>(state, (RES_XOR_OP_TWO() & 0x10) == 0x10 ? 1 : 0)
 
 #define FLAG_CLEAR_CF_OF()	\
 	eflag<EFLAG_CF>(state, 0);\
-	eflag<EFLAG_OF>(state, 0);\
-	
+	eflag<EFLAG_OF>(state, 0)
 
 	void Ci8086::onOpcode0X(uint8_t opcode) {
 		USE_STATE(this, state);
 		USE_FETCH_STATE(this, fst);
 
-		switch (opcode) {
+		switch (opcode & 0x0f) {
 		case 0x00: { /* 00 ADD Eb Gb */
 			OPERAND_RM8_REG8();
 			COMPUTE(+);
@@ -531,6 +532,311 @@ namespace v86 {
 		}
 		case 0x0F: { /* 0F POP SEG_CS */
 			POP16_SEG(uint16_t, cs);
+			break;
+		}
+		}
+	}
+
+	void Ci8086::onOpcode1X(uint8_t opcode) {
+		USE_STATE(this, state);
+		USE_FETCH_STATE(this, fst);
+		switch (opcode & 0x0f) {
+		case 0x00: { /* 10 ADC Eb Gb */
+			OPERAND_RM8_REG8();
+			COMPUTE(+, +eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CF_OF_AF(sizeof(uint8_t));
+			writeRM8(fst->res.dword);
+			break;
+		}
+
+		case 0x01: { /* 11 ADC Ev Gv */
+			OPERAND_RM16_REG16();
+			COMPUTE(+, +eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			writeRM16(fst->res.dword);
+			break;
+		}
+
+		case 0x02: { /* 12 ADC Gb Eb */
+			OPERAND_REG8_RM8();
+			COMPUTE(+, +eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CF_OF_AF(sizeof(uint8_t));
+			RM_REG_BYTE(fst->reg) = fst->res.dword;
+			break;
+		}
+
+		case 0x03: { /* 13 ADC Gv Ev */
+			OPERAND_REG16_RM16();
+			COMPUTE(+, +eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			RM_REG_WORD(fst->reg) = fst->res.dword;
+			break;
+		}
+
+		case 0x04: { /* 14 ADC REG_AL Ib */
+			OPERAND_RegAL_Ib();
+			COMPUTE(+, +eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CF_OF_AF(sizeof(uint8_t));
+			state->al = fst->res.dword;
+			break;
+		}
+
+		case 0x05: { /* 15 ADC eAX Iv */
+			OPERAND_RegEAX_Iv();
+			COMPUTE(+, +eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			state->ax = fst->res.dword;
+			break;
+		}
+
+		case 0x06: { /* 16 PUSH SEG_SS */
+			PUSH16_SEG(uint16_t, ss);
+			break;
+		}
+
+		case 0x07: { /* 17 POP SEG_SS */
+			POP16_SEG(uint16_t, ss);
+			break;
+		}
+
+		case 0x08: { /* 18 SBB Eb Gb */
+			OPERAND_RM8_REG8();
+			COMPUTE(-,-eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			writeRM8(fst->res.dword);
+			break;
+		}
+
+		case 0x09: { /* 19 SBB Ev Gv */
+			OPERAND_RM16_REG16();
+			COMPUTE(-, -eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			writeRM16(fst->res.dword);
+			break;
+
+		}
+		case 0x0A: { /* 1A SBB Gb Eb */
+			OPERAND_REG8_RM8();
+			COMPUTE(-, -eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			RM_REG_BYTE(fst->reg) = fst->res.dword;
+			break;
+		}
+		case 0x0B: { /* 1B SBB Gv Ev */
+			OPERAND_REG16_RM16();
+			COMPUTE(-, -eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			RM_REG_WORD(fst->reg) = fst->res.dword;
+			break;
+		}
+		case 0x0C: { /* 1C SBB REG_AL Ib */
+			OPERAND_RegAL_Ib();
+			COMPUTE(-, -eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			state->al = fst->res.dword;
+			break;
+		}
+		case 0x0D: { /* 1D SBB eAX Iv */
+			OPERAND_RegEAX_Iv();
+			COMPUTE(-, -eflag<EFLAG_CF>(state));
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			state->ax = fst->res.dword;
+			break;
+
+		}
+		case 0x0E: { /* 1E PUSH SEG_DS */
+			PUSH16_SEG(uint16_t, ds);
+			break;
+		}
+		case 0x0F: { /* 1F POP SEG_DS */
+			POP16_SEG(uint16_t, ds);
+			break;
+		}
+		}
+	}
+
+	void Ci8086::onOpcode2X(uint8_t opcode) {
+		USE_STATE(this, state);
+		USE_FETCH_STATE(this, fst);
+
+		switch (opcode & 0x0f) {
+		case 0x00: { /* 20 AND Eb Gb */
+			OPERAND_RM8_REG8();
+			COMPUTE(&);
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			writeRM8(fst->res.dword);
+			break;
+		}
+
+		case 0x01: { /* 21 AND Ev Gv */
+			OPERAND_RM16_REG16();
+			COMPUTE(&);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CLEAR_CF_OF();
+			writeRM16(fst->res.dword);
+			break;
+		}
+
+		case 0x02: { /* 22 AND Gb Eb */
+			OPERAND_REG8_RM8();
+			COMPUTE(&);
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			RM_REG_BYTE(fst->reg) = fst->res.dword;
+			break;
+		}
+
+		case 0x03: { /* 23 AND Gv Ev */
+			OPERAND_REG16_RM16();
+			COMPUTE(&);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CLEAR_CF_OF();
+			RM_REG_WORD(fst->reg) = fst->res.dword;
+			break;
+		}
+
+		case 0x04: { /* 24 AND REG_AL Ib */
+			OPERAND_RegAL_Ib();
+			COMPUTE(&);
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			state->al = fst->res.dword;
+			break;
+		}
+
+		case 0x05: { /* 25 AND eAX Iv */
+			OPERAND_RegEAX_Iv();
+			COMPUTE(&);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CLEAR_CF_OF();
+			state->ax = fst->res.dword;
+			break;
+		}
+
+		case 0x06: { /* 26 NOP */
+			break;
+		}
+
+		case 0x07: { /* 27 DAA */
+			if ((state->al & 0x0f) > 9 || eflag<EFLAG_AF>(state)) {
+				fst->op[0].dword = state->al + 6;
+				state->al = fst->op[0].dword & 255;
+
+				if ((fst->op[0].dword & REG_MASK_HI8) != 0) {
+					eflag<EFLAG_CF>(state, 1);
+				}
+				else {
+					eflag<EFLAG_CF>(state, 0);
+				}
+
+				eflag<EFLAG_AF>(state, 1);
+			}
+
+			if (state->al > 0x9f || eflag<EFLAG_CF>(state)) {
+				fst->res.dword = (state->al += 0x60);
+				eflag<EFLAG_CF>(state, 1);
+			}
+
+			fst->res.dword = (state->al &= 0xff);
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			break;
+		}
+
+		case 0x08: { /* 28 SUB Eb Gb */
+			OPERAND_RM8_REG8();
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CF_OF_AF(sizeof(uint8_t));
+			writeRM8(fst->res.dword);
+			break;
+		}
+
+		case 0x09: { /* 29 SUB Ev Gv */
+			OPERAND_RM16_REG16();
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			writeRM16(fst->res.dword);
+			break;
+
+		}
+		case 0x0A: { /* 2A SUB Gb Eb */
+			OPERAND_REG8_RM8();
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CF_OF_AF(sizeof(uint8_t));
+			RM_REG_BYTE(fst->reg) = fst->res.dword;
+			break;
+		}
+		case 0x0B: { /* 2B SUB Gv Ev */
+			OPERAND_REG16_RM16();
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			RM_REG_WORD(fst->reg) = fst->res.dword;
+			break;
+		}
+		case 0x0C: { /* 2C SUB REG_AL Ib */
+			OPERAND_RegAL_Ib();
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CF_OF_AF(sizeof(uint8_t));
+			state->al = fst->res.dword;
+			break;
+		}
+		case 0x0D: { /* 2D SUB eAX Iv */
+			OPERAND_RegEAX_Iv();
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			state->ax = fst->res.dword;
+			break;
+
+		}
+		case 0x0E: { /* 2E NOP */
+			break;
+		}
+		case 0x0F: { /* 2F DAS */
+			if ((state->al & 0x0f) > 9 || eflag<EFLAG_AF>(state)) {
+				fst->op[0].dword = state->al - 6;
+				state->al = fst->op[0].dword & 255;
+
+				if ((fst->op[0].dword & REG_MASK_HI8) != 0) {
+					eflag<EFLAG_CF>(state, 1);
+				}
+				else {
+					eflag<EFLAG_CF>(state, 0);
+				}
+
+				eflag<EFLAG_AF>(state, 1);
+			}
+			else {
+				eflag<EFLAG_AF>(state, 0);
+			}
+
+			if ((state->al & 0xf0) > 0x90 || eflag<EFLAG_CF>(state)) {
+				fst->res.dword = (state->al -= 0x60);
+				eflag<EFLAG_CF>(state, 1);
+			}
+			else {
+				eflag<EFLAG_CF>(state, 0);
+			}
+
+			fst->res.dword = (state->al &= 0xff);
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
 			break;
 		}
 		}
