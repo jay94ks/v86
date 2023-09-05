@@ -5,28 +5,32 @@
 namespace v86 {
 	enum EREGS {
 		REG_EAX = 0,
-		REG_EBX,
 		REG_ECX,
 		REG_EDX,
+		REG_EBX,
+		REG_ESP,
+		REG_EBP,
 		REG_ESI,
 		REG_EDI,
-		REG_EBP,
-		REG_ESP,
 
 		REG_EIP,
 		REG_EFLAGS,
 
+		REG_P_EIP, // -- previous EIP.
+		REG_T_EIP, // -- trace purpose EIP.
 		REG_MAX
 	};
 
 	enum ESEGS {
-		SEG_SS = 0,
+		SEG_ES = 0,
 		SEG_CS,
+		SEG_SS,
 		SEG_DS,
-		SEG_ES,
 		SEG_GS,
 		SEG_FS,
 
+		SEG_P_CS, // -- previous CS.
+		SEG_T_CS, // -- trace purpose CS.
 		SEG_MAX
 	};
 

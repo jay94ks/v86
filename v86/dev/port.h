@@ -1,11 +1,15 @@
 #ifndef __V86_DEV_IOPORT_H__
 #define __V86_DEV_IOPORT_H__
-#include "../types.h"
+#include "device.h"
 
 namespace v86 {
-	class IIOPort : public IRefCounted {
+	class IPort : public IDevice {
 	public:
-		virtual ~IIOPort() { }
+		static constexpr EDEV TYPE = EDEV_IOPORT;
+
+	public:
+		IPort() : IDevice(TYPE) { }
+		virtual ~IPort() { }
 
 	public:
 		/* write a byte to port. */

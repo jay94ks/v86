@@ -1,6 +1,42 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="FileName.cpp" />
+    <ClInclude Include="types.h" />
+    <ClInclude Include="cpu\reg.h">
+      <Filter>cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\state.h">
+      <Filter>cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="mask.h" />
+    <ClInclude Include="dev\memory.h">
+      <Filter>dev</Filter>
+    </ClInclude>
+    <ClInclude Include="dev\port.h">
+      <Filter>dev</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\i8086.h">
+      <Filter>cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\proc.h">
+      <Filter>cpu</Filter>
+    </ClInclude>
+    <ClInclude Include="dev\device.h">
+      <Filter>dev</Filter>
+    </ClInclude>
+    <ClInclude Include="cpu\mmu\stack.h">
+      <Filter>cpu\mmu</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="cpu">
+      <UniqueIdentifier>{e90318eb-7976-4666-bd97-fcb93eb43d15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="dev">
+      <UniqueIdentifier>{508d7046-cb86-4785-8b48-528b897a6690}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpu\mmu">
+      <UniqueIdentifier>{73f1711c-a3d2-43d3-b5bd-393fc65d379c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

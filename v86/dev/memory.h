@@ -1,10 +1,14 @@
 #ifndef __V86_DEV_MEMORY_H__
 #define __V86_DEV_MEMORY_H__
-#include "../types.h"
+#include "device.h"
 
 namespace v86 {
-	class IMemory : public IRefCounted {
+	class IMemory : public IDevice {
 	public:
+		static constexpr EDEV TYPE = EDEV_IOPORT;
+
+	public:
+		IMemory() : IDevice(TYPE) { }
 		virtual ~IMemory() { }
 
 	public:
