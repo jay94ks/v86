@@ -74,17 +74,23 @@ namespace v86 {
 		virtual void writeRM32(uint32_t value);
 
 	protected:
-		/* 0x00 ~ 0x0F opcode series. */
+		/* 0x00 ~ 0x0F opcode series (ADD, PUSH/POP ES, OR, PUSH/POP CS. */
 		virtual void onOpcode0X(uint8_t opcode);
 
-		/* 0x10 ~ 0x1F opcode series. */
+		/* 0x10 ~ 0x1F opcode series (ADC, PUSH/POP SS, SBB, PUSH/POP DS. */
 		virtual void onOpcode1X(uint8_t opcode);
 
-		/* 0x20 ~ 0x2F opcode series. */
+		/* 0x20 ~ 0x2F opcode series (AND, DAA, SUB, DAS). */
 		virtual void onOpcode2X(uint8_t opcode);
 
-		/* 0x30 ~ 0x3F opcode series. */
+		/* 0x30 ~ 0x3F opcode series (XOR, AAA, CMP, AAS). */
 		virtual void onOpcode3X(uint8_t opcode);
+
+		/* 0x40 ~ 0x4F opcode series (INC/DEC). */
+		virtual void onOpcode4X(uint8_t opcode);
+
+		/* 0x50 ~ 0x5F opcode series (PUSH/POP GPR). */
+		virtual void onOpcode5X(uint8_t opcode);
 	};
 
 }

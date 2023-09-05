@@ -119,6 +119,8 @@ namespace v86 {
 		case 0x01: onOpcode1X(opcode); break;
 		case 0x02: onOpcode2X(opcode); break;
 		case 0x03: onOpcode3X(opcode); break;
+		case 0x04: onOpcode4X(opcode); break;
+		case 0x05: onOpcode5X(opcode); break;
 		}
 	}
 
@@ -989,6 +991,239 @@ namespace v86 {
 			state->al &= 0x0f;
 			break;
 		}
+		}
+	}
+
+	void Ci8086::onOpcode4X(uint8_t opcode) {
+		USE_STATE(this, state);
+		USE_FETCH_STATE(this, fst);
+
+		switch (opcode & 0x0f) {
+		case 0x00: { /* 40 INC eAX */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->ax;
+			fst->op[1].dword = 1;
+
+			COMPUTE(+);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->ax = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x01: { /* 41 INC eCX */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->cx;
+			fst->op[1].dword = 1;
+
+			COMPUTE(+);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->cx = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x02: { /* 42 INC eDX */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->dx;
+			fst->op[1].dword = 1;
+
+			COMPUTE(+);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->dx = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x03: { /* 43 INC eBX */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->bx;
+			fst->op[1].dword = 1;
+
+			COMPUTE(+);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->bx = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x04: { /* 44 INC eSP */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->sp;
+			fst->op[1].dword = 1;
+
+			COMPUTE(+);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->sp = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x05: { /* 45 INC eBP */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->bp;
+			fst->op[1].dword = 1;
+
+			COMPUTE(+);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->bp = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x06: { /* 46 INC eSI */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->si;
+			fst->op[1].dword = 1;
+
+			COMPUTE(+);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->si = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x07: { /* 47 INC eDI */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->di;
+			fst->op[1].dword = 1;
+
+			COMPUTE(+);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->di = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x08: { /* 48 DEC eAX */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->ax;
+			fst->op[1].dword = 1;
+
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->ax = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x09: { /* 49 DEC eCX */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->cx;
+			fst->op[1].dword = 1;
+
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->cx = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x0A: { /* 4A DEC eDX */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->dx;
+			fst->op[1].dword = 1;
+
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->dx = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x0B: { /* 4B DEC eBX */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->bx;
+			fst->op[1].dword = 1;
+
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->bx = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x0C: { /* 4C DEC eSP */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->sp;
+			fst->op[1].dword = 1;
+
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->sp = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x0D: { /* 4D DEC eBP */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->bp;
+			fst->op[1].dword = 1;
+
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->bp = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x0E: { /* 4E DEC eSI */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->si;
+			fst->op[1].dword = 1;
+
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->si = fst->res.word[REG_WORD];
+			break;
+		}
+
+		case 0x0F: { /* 4F DEC eDI */
+			uint8_t cf = eflag<EFLAG_CF>(state);
+			fst->op[0].dword = state->di;
+			fst->op[1].dword = 1;
+
+			COMPUTE(-);
+			FLAG_ZF_SF_PF(sizeof(uint16_t));
+			FLAG_CF_OF_AF(sizeof(uint16_t));
+			eflag<EFLAG_CF>(state, cf);
+			state->di = fst->res.word[REG_WORD];
+			break;
+		}
+		}
+	}
+
+	void Ci8086::onOpcode5X(uint8_t opcode) {
+		USE_STATE(this, state);
+		USE_FETCH_STATE(this, fst);
+
+		opcode &= 0x0f;
+		uint8_t reg = opcode <= 0x07
+			? opcode : opcode - 0x08;
+
+		/* reg: eAX (0), eCX, eDX, eBX, eSP, eBP, eSI, eDI (7) */
+		if (opcode <= 0x07) {
+			push(&state->regs[reg].word[REG_WORD], sizeof(uint16_t));
+		}
+
+		else {
+			pop(&state->regs[reg].word[REG_WORD], sizeof(uint16_t));
 		}
 	}
 
