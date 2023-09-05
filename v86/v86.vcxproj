@@ -19,7 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FileName.cpp" />
+    <ClInclude Include="cpu\proc.h" />
+    <ClInclude Include="cpu\i8086.h" />
+    <ClInclude Include="cpu\reg.h" />
+    <ClInclude Include="cpu\state.h" />
+    <ClInclude Include="dev\device.h" />
+    <ClInclude Include="dev\port.h" />
+    <ClInclude Include="dev\memory.h" />
+    <ClInclude Include="mask.h" />
+    <ClInclude Include="types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="cpu\i8086.cpp" />
+    <ClCompile Include="cpu\proc.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
