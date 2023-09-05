@@ -94,6 +94,9 @@ namespace v86 {
 
 		/* 0x60 ~ 0x6F opcode series (PUSHA, POPA, BOUND, PUSH Iv, IMUL, PUSB Ib, INSB, INSW, OUTSB, OUTSW) */
 		virtual void onOpcode6X(uint8_t opcode);
+
+		/* 0x70 ~ 0x7F opcode series (JMP series). */
+		virtual void onOpcode7X(uint8_t opcode);
 	};
 
 }

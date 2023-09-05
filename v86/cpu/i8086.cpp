@@ -99,6 +99,7 @@ namespace v86 {
 		case 0x04: onOpcode4X(opcode); break;
 		case 0x05: onOpcode5X(opcode); break;
 		case 0x06: onOpcode6X(opcode); break;
+		case 0x07: onOpcode7X(opcode); break;
 		}
 	}
 
@@ -1245,27 +1246,27 @@ namespace v86 {
 		case 0x00: { /* 60 PUSHA */
 			uint16_t o_sp = state->sp;
 
-			PUSH16_REG(uint16_t, ax);
-			PUSH16_REG(uint16_t, cx);
-			PUSH16_REG(uint16_t, dx);
-			PUSH16_REG(uint16_t, bx);
+			{ PUSH16_REG(uint16_t, ax); }
+			{ PUSH16_REG(uint16_t, cx); }
+			{ PUSH16_REG(uint16_t, dx); }
+			{ PUSH16_REG(uint16_t, bx); }
 			push(&o_sp, sizeof(o_sp));
-			PUSH16_REG(uint16_t, bp);
-			PUSH16_REG(uint16_t, si);
-			PUSH16_REG(uint16_t, di);
+			{ PUSH16_REG(uint16_t, bp); }
+			{ PUSH16_REG(uint16_t, si); }
+			{ PUSH16_REG(uint16_t, di); }
 			break;
 		}
 
 		case 0x01: { /* 61 POPA */
 			uint16_t unused;
-			POP16_REG(uint16_t, ax);
-			POP16_REG(uint16_t, cx);
-			POP16_REG(uint16_t, dx);
-			POP16_REG(uint16_t, bx);
+			{ POP16_REG(uint16_t, ax); }
+			{ POP16_REG(uint16_t, cx); }
+			{ POP16_REG(uint16_t, dx); }
+			{ POP16_REG(uint16_t, bx); }
 			pop(&unused, sizeof(unused)); // --> sp.
-			POP16_REG(uint16_t, bp);
-			POP16_REG(uint16_t, si);
-			POP16_REG(uint16_t, di);
+			{ POP16_REG(uint16_t, bp); }
+			{ POP16_REG(uint16_t, si); }
+			{ POP16_REG(uint16_t, di); }
 			break;
 		}
 
@@ -1292,6 +1293,7 @@ namespace v86 {
 			}
 
 			break;
+		}
 
 		case 0x03: case 0x04: case 0x05: case 0x06: case 0x07:
 			/* 63 ~ 67 NOP. */
@@ -1449,6 +1451,147 @@ namespace v86 {
 			state->cx--;
 			state->eip = state->t_eip;
 			break;
+		}
+		}
+	}
+
+	void Ci8086::onOpcode7X(uint8_t opcode) {
+		USE_STATE(this, state);
+		USE_FETCH_STATE(this, fst);
+
+		switch (opcode & 0x0f) {
+		case 0x00: { /* 70 JO Jb */
+			uint16_t rel = fetch();
+			if (eflag<EFLAG_OF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x01: { /* 71 JNO Jb */
+			uint16_t rel = fetch();
+			if (!eflag<EFLAG_OF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x02: { /* 72 JB Jb */
+			uint16_t rel = fetch();
+			if (eflag<EFLAG_CF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x03: { /* 73 JNB Jb */
+			uint16_t rel = fetch();
+			if (!eflag<EFLAG_CF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x04: { /* 74 JZ Jb */
+			uint16_t rel = fetch();
+			if (eflag<EFLAG_ZF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x05: { /* 75 JNZ Jb */
+			uint16_t rel = fetch();
+			if (!eflag<EFLAG_ZF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x06: { /* 76 JBE Jb */
+			uint16_t rel = fetch();
+			if (eflag<EFLAG_CF>(state) || eflag<EFLAG_ZF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x07: { /* 77 JA Jb */
+			uint16_t rel = fetch();
+			if (!eflag<EFLAG_CF>(state) && !eflag<EFLAG_ZF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x08: { /* 78 JS Jb */
+			uint16_t rel = fetch();
+			if (eflag<EFLAG_SF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x09: { /* 79 JNS Jb */
+			uint16_t rel = fetch();
+			if (!eflag<EFLAG_SF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x0A: { /* 7A JPE Jb */
+			uint16_t rel = fetch();
+			if (eflag<EFLAG_PF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x0B: { /* 7B JPO Jb */
+			uint16_t rel = fetch();
+			if (!eflag<EFLAG_PF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x0C: { /* 7C JL Jb */
+			uint16_t rel = fetch();
+			if (eflag<EFLAG_SF>(state) != eflag<EFLAG_OF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x0D: { /* 7D JGE Jb */
+			uint16_t rel = fetch();
+			if (eflag<EFLAG_SF>(state) == eflag<EFLAG_OF>(state)) {
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x0E: { /* 7E JLE Jb */
+			uint16_t rel = fetch();
+			if (eflag<EFLAG_SF>(state) != eflag<EFLAG_OF>(state) ||
+				eflag<EFLAG_ZF>(state))
+			{
+				state->eip += rel;
+			}
+
+			break;
+		}
+		case 0x0F: { /* 7F JG Jb */
+			uint16_t rel = fetch();
+			if (eflag<EFLAG_SF>(state) == eflag<EFLAG_OF>(state) &&
+				!eflag<EFLAG_ZF>(state))
+			{
+				state->eip += rel;
+			}
+
+			break;
+		}
 		}
 	}
 
