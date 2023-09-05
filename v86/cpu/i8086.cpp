@@ -1450,7 +1450,6 @@ namespace v86 {
 			state->eip = state->t_eip;
 			break;
 		}
-		}
 	}
 
 }
