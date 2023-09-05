@@ -100,6 +100,7 @@ namespace v86 {
 		case 0x05: onOpcode5X(opcode); break;
 		case 0x06: onOpcode6X(opcode); break;
 		case 0x07: onOpcode7X(opcode); break;
+		case 0x08: onOpcode8X(opcode); break;
 		}
 	}
 
@@ -1590,6 +1591,218 @@ namespace v86 {
 				state->eip += rel;
 			}
 
+			break;
+		}
+		}
+	}
+
+	void Ci8086::onOpcode8X(uint8_t opcode) {
+		USE_STATE(this, state);
+		USE_FETCH_STATE(this, fst);
+		switch (opcode & 0x0f) {
+		case 0x00: case 02: { /* 80/82 GRP1 Eb Ib */
+			fetchModRm16();
+			fst->op[0].dword = readRM8();
+			fst->op[1].dword = fetch();
+
+			switch (fst->reg) {
+			case 0: /* ADD */
+				COMPUTE(+);
+				FLAG_ZF_SF_PF(sizeof(uint8_t));
+				FLAG_CF_OF_AF(sizeof(uint8_t));
+				break;
+
+			case 1: /* OR */
+				COMPUTE(|);
+				FLAG_ZF_SF_PF(sizeof(uint8_t));
+				FLAG_CLEAR_CF_OF();
+				break;
+
+			case 2: /* ADC */
+				COMPUTE(+, +eflag<EFLAG_CF>(state));
+				FLAG_ZF_SF_PF(sizeof(uint8_t));
+				FLAG_CF_OF_AF(sizeof(uint8_t));
+				break;
+
+			case 3: /* SBB */
+				COMPUTE(-, -eflag<EFLAG_CF>(state));
+				FLAG_ZF_SF_PF(sizeof(uint8_t));
+				FLAG_CF_OF_AF(sizeof(uint8_t));
+				break;
+
+			case 4: /* AND */
+				COMPUTE(&);
+				FLAG_ZF_SF_PF(sizeof(uint8_t));
+				FLAG_CLEAR_CF_OF();
+				break;
+
+			case 5: /* SUB */
+			case 7: /* SUB: No store result. */
+				COMPUTE(-);
+				FLAG_ZF_SF_PF(sizeof(uint8_t));
+				FLAG_CF_OF_AF(sizeof(uint8_t));
+				break;
+
+			case 6: /* XOR */
+				COMPUTE(^);
+				FLAG_ZF_SF_PF(sizeof(uint8_t));
+				FLAG_CLEAR_CF_OF();
+				break;
+
+			default:
+				break;
+			}
+
+			if (fst->reg < 7) {
+				writeRM8(fst->res.byte[REG_BYTE_LO]);
+			}
+			break;
+		}
+
+		case 0x01: case 0x03: { /* 81 GRP1 Ev Iv */
+			fetchModRm16();
+			fst->op[0].dword = readRM16();
+			if ((opcode & 0x0f) == 0x01) {
+				fst->op[1].dword = fetch16();
+			}
+
+			else {
+				fst->op[1].dword = fetch();
+			}
+
+			switch (fst->reg) {
+			case 0: /* ADD */
+				COMPUTE(+);
+				FLAG_ZF_SF_PF(sizeof(uint16_t));
+				FLAG_CF_OF_AF(sizeof(uint16_t));
+				break;
+
+			case 1: /* OR */
+				COMPUTE(| );
+				FLAG_ZF_SF_PF(sizeof(uint16_t));
+				FLAG_CLEAR_CF_OF();
+				break;
+
+			case 2: /* ADC */
+				COMPUTE(+, +eflag<EFLAG_CF>(state));
+				FLAG_ZF_SF_PF(sizeof(uint16_t));
+				FLAG_CF_OF_AF(sizeof(uint16_t));
+				break;
+
+			case 3: /* SBB */
+				COMPUTE(-, -eflag<EFLAG_CF>(state));
+				FLAG_ZF_SF_PF(sizeof(uint16_t));
+				FLAG_CF_OF_AF(sizeof(uint16_t));
+				break;
+
+			case 4: /* AND */
+				COMPUTE(&);
+				FLAG_ZF_SF_PF(sizeof(uint16_t));
+				FLAG_CLEAR_CF_OF();
+				break;
+
+			case 5: /* SUB */
+			case 7: /* SUB: No store result. */
+				COMPUTE(-);
+				FLAG_ZF_SF_PF(sizeof(uint16_t));
+				FLAG_CF_OF_AF(sizeof(uint16_t));
+				break;
+
+			case 6: /* XOR */
+				COMPUTE(^);
+				FLAG_ZF_SF_PF(sizeof(uint16_t));
+				FLAG_CLEAR_CF_OF();
+				break;
+
+			default:
+				break;
+			}
+
+			if (fst->reg < 7) {
+				writeRM8(fst->res.byte[REG_BYTE_LO]);
+			}
+			break;
+		}
+
+		case 0x04: { /* 84 TEST Gb Eb */
+			fetchModRm16();
+			OPERAND_REG8_RM8();
+			COMPUTE(&);
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			break;
+		}
+
+		case 0x05: { /* 85 TEST Gv Ev */
+			fetchModRm16();
+			OPERAND_REG16_RM16();
+			COMPUTE(&);
+			FLAG_ZF_SF_PF(sizeof(uint8_t));
+			FLAG_CLEAR_CF_OF();
+			break;
+		}
+
+		case 0x06: { /* 86 XCHG Gb Eb */
+			fetchModRm16();
+			OPERAND_REG8_RM8();
+			writeRM8(fst->op[0].byte[REG_BYTE_LO]);
+			RM_REG_BYTE(fst->rm) = fst->op[1].byte[REG_BYTE_LO];
+			break;
+		}
+
+		case 0x07: { /* 87 XCHG Gv Ev */
+			fetchModRm16();
+			OPERAND_REG16_RM16();
+			writeRM16(fst->op[0].word[REG_WORD]);
+			RM_REG_WORD(fst->rm) = fst->op[1].word[REG_WORD];
+			break;
+		}
+
+		case 0x08: { /* 88 MOV Eb Gb */
+			fetchModRm16();
+			writeRM8(RM_REG_BYTE(fst->rm));
+			break;
+		}
+
+		case 0x09: { /* 89 MOV Ev Gv */
+			fetchModRm16();
+			writeRM16(RM_REG_WORD(fst->rm));
+			break;
+		}
+		case 0x0A: { /* 8A MOV Gb Eb */
+			fetchModRm16();
+			RM_REG_BYTE(fst->rm) = readRM8();
+			break;
+		}
+		case 0x0B: { /* 8B MOV Gv Ev */
+			fetchModRm16();
+			RM_REG_WORD(fst->rm) = readRM16();
+			break;
+		}
+		case 0x0C: { /* 8C MOV Ew Sw */
+			fetchModRm16();
+			writeRM16(state->segs[fst->reg].word[REG_WORD]);
+			break;
+		}
+		case 0x0D: { /* 8D LEA Gv M */
+			fetchModRm16();
+			uint32_t addr = addrModRM16();
+			RM_REG_WORD(fst->reg) 
+				= addr - (state->prefix.seg << 4);
+			break;
+		}
+
+		case 0x0E: { /* 8E MOV Sw Ew */
+			fetchModRm16();
+			state->segs[fst->reg].word[REG_WORD] = readRM16();
+			break;
+		}
+
+		case 0x0F: { /* 8F POP Ev */
+			fetchModRm16();
+			uint16_t val;
+			pop(&val, sizeof(val));
+			writeRM16(val);
 			break;
 		}
 		}

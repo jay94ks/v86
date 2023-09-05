@@ -97,6 +97,9 @@ namespace v86 {
 
 		/* 0x70 ~ 0x7F opcode series (JMP series). */
 		virtual void onOpcode7X(uint8_t opcode);
+
+		/* 0x80 ~ 0x8F opcode series (80/82 GRP1, 83, 81/83, TEST, XCHG, MOV, LEA, POP Ev) */
+		virtual void onOpcode8X(uint8_t opcode);
 	};
 
 }
