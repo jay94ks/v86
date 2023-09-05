@@ -1,5 +1,5 @@
-#ifndef __V86_CPU_MEMORY_H__
-#define __V86_CPU_MEMORY_H__
+#ifndef __V86_DEV_MEMORY_H__
+#define __V86_DEV_MEMORY_H__
 #include "../types.h"
 
 namespace v86 {
@@ -16,4 +16,4 @@ namespace v86 {
 	};
 }
 
-#endif // __V86_CPU_MEMORY_H__
+#endif // __V86_DEV_MEMORY_H__
